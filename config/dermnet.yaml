@@ -1,0 +1,14 @@
+# dermnet config
+
+# model parameters
+model_name: "inception_v3"
+input_size: 299
+num_classes: 23
+
+# train/validation parameters
+batch_size: 64
+epochs: 20
+learning_rate: 0.001
+val_split: 0.2
+train_dir: "data/train"
+test_dir: "data/test"
