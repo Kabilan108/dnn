@@ -10,5 +10,5 @@ batch_size: 64
 epochs: 20
 learning_rate: 0.001
 val_split: 0.2
-train_dir: "data/train"
-test_dir: "data/test"
+train_dir: "data/dermnet/train"
+test_dir: "data/dermnet/test"
