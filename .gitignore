@@ -98,3 +98,4 @@ target/
 data/*/*
 models/*
 !.gitkeep
+logs/
