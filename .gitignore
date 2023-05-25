@@ -99,3 +99,7 @@ data/
 models/
 !.gitkeep
 logs/
+
+# archives
+*.zip
+*.tar.gz
