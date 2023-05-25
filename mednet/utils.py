@@ -51,16 +51,21 @@ def plot_roc(y_test, y_score, pos_label=0):
     fpr, tpr, _ = roc_curve(y_test, y_score, pos_label=pos_label)
     auc_roc = auc(fpr, tpr)
 
-    plt.figure()
-    plt.plot(fpr, tpr, label=f"ROC Curve (AUC = {auc_roc:.2f})")
-    plt.plot([0, 1], [0, 1], "k--")
-    plt.legend(loc="lower right")
+    fig, ax = plt.subplots(figsize=(4, 3))
+    ax.plot(fpr, tpr, color="darkorange", label=f"ROC Curve (AUC = {auc_roc:.2f})")
+    ax.plot([0, 1], [0, 1], "k--")
+    ax.legend(loc="lower right", fancybox=False, frameon=False)
 
-    plt.title("Receiver Operating Characteristic (ROC) Curve")
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+
+    # Major and minor grid lines
+    ax.grid(which="major", color="#666666", linestyle="--", alpha=0.2)
+    ax.minorticks_on()
+    ax.grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
+    ax.spines[["top", "right"]].set_visible(False)
 
     plt.xlim([0.0, 1.05])
     plt.ylim((0.0, 1.05))
 
-    return auc_roc
+    return auc_roc, (fig, ax)
