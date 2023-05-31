@@ -96,7 +96,7 @@ def main(config, kw):
     }
 
     # Load pretrained model
-    model = train.load_ptm(config)
+    model = train.load_ptm(config, replace_last=True, feature_extract=True)
     model = model.to(train.device())
     model.eval()
 
@@ -107,15 +107,19 @@ def main(config, kw):
     # Run images through model and save output to disk
     for split in ["train", "test", "val"]:
         for i, (inputs, labels) in enumerate(tqdm(dataloaders[split], desc=split)):
+            # Move to GPU
             inputs = inputs.to(train.device())
 
+            # Forward pass
             with torch.no_grad():
                 features = model(inputs)
                 features = features.cpu().detach().numpy()
 
+            # Create directory for split
             root = config["features"][split]
             os.makedirs(root, exist_ok=True)
 
+            # Save features to disk
             for j, feature in enumerate(features):
                 label = labels[j].numpy()
                 np.save(f"{root}/FL{i * len(inputs) + j}.npy", (label, feature))
