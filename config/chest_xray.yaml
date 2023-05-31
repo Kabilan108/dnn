@@ -1,0 +1,28 @@
+# Config for OCT Images
+
+# Pre-trained model
+model-name: "inceptionv3"
+input-height: 299
+input-width: 299
+
+# Model training parameters
+num-classes: 4
+batch-size: 8
+epochs: 20
+lr: 0.001
+
+# Directories
+train-dir: "data/oct/train"
+test-dir: "data/oct/test"
+val-dir: "data/oct/val"
+
+# Image augmentation
+input-mean: [0.485, 0.456, 0.406]
+input-std: [0.229, 0.224, 0.225]
+
+# Bottlenecks (features)
+features:
+  root: "data/oct/features"
+  train: "data/oct/features/train"
+  test: "data/oct/features/test"
+  val: "data/oct/features/val"
