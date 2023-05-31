@@ -103,19 +103,6 @@ def get_bottleneck_path(image_lists, label_name, index, bottleneck_dir, category
     return bottleneck_file
 
 
-def imshow(image, title=None):
-    """Visualize Image tensor"""
-    global config
-    image = image.numpy().transpose((1, 2, 0))
-    image = config["input-std"] * image + config["input-mean"]
-    image = np.clip(image, 0, 1)
-
-    plt.figure()
-    plt.imshow(image)
-    if title is not None:
-        plt.title(title)
-
-
 def plot_history(history):
     """
     Plot training history
@@ -154,4 +141,5 @@ def plot_history(history):
     axes[1].spines[["top", "right"]].set_visible(False)
 
     plt.tight_layout()
-    plt.show()
+
+    return fig, axes

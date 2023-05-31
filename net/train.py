@@ -6,12 +6,20 @@ Functions & Classes for Model Training
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
+from torch.nn import functional as F
 import torch
+
+from sklearn.metrics import roc_curve, auc, roc_auc_score, confusion_matrix
+from sklearn.preprocessing import label_binarize
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
 
 from tqdm.auto import tqdm
 from glob import glob
-import numpy as np
 import copy
+import json
 import time
 import re
 
@@ -100,7 +108,7 @@ def train_model(
     best_acc = 0.0
 
     for epoch in range(epoch_start, epoch_start + num_epochs):
-        print(f"Epoch {epoch + 1}/{num_epochs}")
+        print(f"Epoch {epoch + 1}/{num_epochs + epoch_start}")
         print("-" * 10)
 
         # Each epoch has a training and validation phase
@@ -181,3 +189,122 @@ def train_model(
     # Load best model weights
     model.load_state_dict(best_model_wts)
     return model, history
+
+
+def evaluate_model(model, test_loader):
+    """Evaluate model performance"""
+
+    model.eval()
+
+    # store true and predicted labels, and probabilities of each class
+    true_labs, pred_labs, pred_probs = [], [], []
+
+    # counters
+    total, corrects = 0, 0
+
+    for inputs, labels in test_loader:
+        # move to device
+        inputs = inputs.to(device())
+        labels = labels.to(device())
+
+        # forward pass
+        with torch.no_grad():
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+
+            # compute probabilities
+            probs = F.softmax(outputs, dim=1)
+
+            # Move data to cpu
+            labels = labels.cpu().numpy()
+            preds = preds.cpu().numpy()
+            probs = probs.cpu().numpy()
+
+            # Update lists
+            true_labs.extend(labels)
+            pred_labs.extend(preds)
+            pred_probs.extend(probs)
+
+            # Update counters
+            total += len(labels)
+            corrects += np.sum(labels == preds)
+
+    # Calculate accuracy
+    acc = corrects / total * 100
+
+    # Convert to numpy arrays
+    true_labs = np.array(true_labs)
+    pred_labs = np.array(pred_labs)
+    pred_probs = np.array(pred_probs)
+
+    return acc, true_labs, pred_labs, pred_probs
+
+
+def load_classes(config, ret="index"):
+    """
+    Load an ordered list of classes based on the dataset created when computing
+    features
+    """
+    with open(config["features"]["classes"], "r") as f:
+        ctoi = json.load(f)
+
+    if ret == "label":
+        return sorted(ctoi, key=ctoi.get)
+    elif ret == "index":
+        return sorted(ctoi.values())
+    elif ret == "dict":
+        return ctoi
+    else:
+        raise ValueError("Invalid return type")
+
+
+def plot_confusion(true_labels, pred_labels, config):
+    """Plot a confusion matrix"""
+    classes = load_classes(config, ret="label")
+    cm = pd.DataFrame(
+        confusion_matrix(true_labels, pred_labels), index=classes, columns=classes
+    )
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    sns.heatmap(cm, annot=True, cmap="Reds", fmt="d", cbar=False, ax=ax)
+    ax.set_ylabel("True Labels", fontsize=11)
+    ax.set_xlabel("Predicted Labels", fontsize=11)
+
+    return fig, ax
+
+
+def plot_roc(true_labels, pred_probs, config):
+    """Plot ROC curve and compute AUC"""
+
+    # Convert labels to binary format for one-vs-rest ROC curve
+    classes = load_classes(config, ret="index")
+    labels = load_classes(config, ret="label")
+    true_labels = label_binarize(true_labels, classes=classes)
+
+    # Initialize variables
+    fpr, tpr, roc_auc = {}, {}, {}
+
+    # Compute ROC curve and ROC area for each class
+    for i in range(len(classes)):
+        fpr[i], tpr[i], _ = roc_curve(true_labels[:, i], pred_probs[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Plot all ROC curves
+    fig, ax = plt.subplots(figsize=(4, 4))
+
+    for i, label in enumerate(labels):
+        ax.plot(fpr[i], tpr[i], lw=1.5, label=f"{label} (AUC = {roc_auc[i]:.3f})")
+
+    ax.plot([0, 1], [0, 1], "k--", lw=1.5)
+    ax.legend(frameon=False, fontsize=9)
+    ax.set_xlim([-0.05, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel("False Positive Rate", fontsize=11)
+    ax.set_ylabel("True Positive Rate", fontsize=11)
+    ax.set_title("ROC Curve", fontsize=11)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.grid(which="major", color="#666666", linestyle="--", alpha=0.2)
+    ax.minorticks_on()
+    ax.grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
+
+    return fig, ax
