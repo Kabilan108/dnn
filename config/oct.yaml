@@ -1,5 +1,7 @@
 # Config for OCT Images
 
+name: "CNN-OCT"
+
 # Pre-trained model
 model-name: "inceptionv3"
 input-height: 299

@@ -1,5 +1,7 @@
 # Config for chest_xray Images
 
+name: "CNN-chest_xray"
+
 # Pre-trained model
 model-name: "inceptionv3"
 input-height: 299
