@@ -5,6 +5,10 @@ Run this script to run the images through the forward pass of the pretrained
 model and save the output to disk.
 """
 
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+import torch
+
 from tqdm.auto import tqdm
 from rich import print
 
@@ -66,12 +70,35 @@ def main(config, kw):
     print("[green]Config:[/green]")
     print(config)
 
-    # Create dataloaders
-    dl = train.feature_dataloaders(config)
+    # Define transforms
+    transform = transforms.Compose(
+        [
+            transforms.Resize((config["input-height"], config["input-width"])),
+            transforms.ToTensor(),
+            transforms.Normalize(config["input-mean"], config["input-std"]),
+        ]
+    )
+
+    # Define datasets
+    data = {
+        "train": datasets.ImageFolder(config["train-dir"], transform),
+        "test": datasets.ImageFolder(config["test-dir"], transform),
+        "val": datasets.ImageFolder(config["val-dir"], transform),
+    }
+
+    # Define dataloaders
+    dataloaders = {
+        "train": DataLoader(
+            data["train"], batch_size=config["batch-size"], shuffle=True
+        ),
+        "test": DataLoader(data["test"], batch_size=config["batch-size"], shuffle=True),
+        "val": DataLoader(data["val"], batch_size=config["batch-size"], shuffle=False),
+    }
 
     # Load pretrained model
     model = train.load_ptm(config)
     model = model.to(train.device())
+    model.eval()
 
     # Create bottleneck directory
     shutil.rmtree(config["features"]["root"], ignore_errors=True)
@@ -79,10 +106,12 @@ def main(config, kw):
 
     # Run images through model and save output to disk
     for split in ["train", "test", "val"]:
-        for i, (inputs, labels) in enumerate(tqdm(dl[split], desc=split)):
+        for i, (inputs, labels) in enumerate(tqdm(dataloaders[split], desc=split)):
             inputs = inputs.to(train.device())
-            features, _ = model(inputs)
-            features = features.cpu().detach().numpy()
+
+            with torch.no_grad():
+                features = model(inputs)
+                features = features.cpu().detach().numpy()
 
             root = config["features"][split]
             os.makedirs(root, exist_ok=True)
