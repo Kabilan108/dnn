@@ -3,10 +3,9 @@ Functions & Classes for Model Training
 """
 
 
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-import pretrainedmodels as models
 import torch
 
 from tqdm.auto import tqdm
@@ -17,14 +16,25 @@ import time
 import re
 
 
-def load_ptm(config, replace_last=True):
+def load_ptm(config, feature_extract=True, replace_last=False):
     """Load a pretrained model and remove the last layer"""
 
-    model = models.__dict__[config["model-name"]](
-        num_classes=1000, pretrained="imagenet"
-    )
+    if config["model-name"] == "inceptionv3":
+        model = models.inception_v3(weights="IMAGENET1K_V1")
+    else:
+        raise NotImplementedError
+
+    if feature_extract:
+        for param in model.parameters():
+            param.requires_grad = False
+
     if replace_last:
-        model.last_linear = torch.nn.Identity()
+        if config["model-name"] == "inceptionv3":
+            model.AuxLogits.fc = torch.nn.Identity()
+            model.fc = torch.nn.Identity()
+        else:
+            raise NotImplementedError
+
     return model
 
 
