@@ -20,6 +20,7 @@ from net import train
 import numpy as np
 import shutil
 import click
+import json
 import yaml
 import os
 
@@ -94,6 +95,11 @@ def main(config, kw):
         "test": DataLoader(data["test"], batch_size=config["batch-size"], shuffle=True),
         "val": DataLoader(data["val"], batch_size=config["batch-size"], shuffle=False),
     }
+
+    # Save class names and indices to disk
+    with open(config["features"]["classes"], "w") as file:
+        classes = data["train"].class_to_idx
+        json.dump(classes, file)
 
     # Load pretrained model
     model = train.load_ptm(config, replace_last=True, feature_extract=True)
