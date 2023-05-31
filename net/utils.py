@@ -114,3 +114,44 @@ def imshow(image, title=None):
     plt.imshow(image)
     if title is not None:
         plt.title(title)
+
+
+def plot_history(history):
+    """
+    Plot training history
+    """
+
+    train_loss = history["train"]["loss"]
+    val_loss = history["val"]["loss"]
+    train_acc = history["train"]["acc"]
+    val_acc = history["val"]["acc"]
+    assert len(train_loss) == len(val_loss) == len(train_acc) == len(val_acc)
+
+    epochs = range(1, len(train_loss) + 1)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+    axes[0].plot(epochs, train_loss, "b", label="Training loss")
+    axes[0].plot(epochs, val_loss, "r", label="Validation loss")
+    axes[0].set_title("Loss")
+    axes[0].set_xlabel("Epochs")
+    axes[0].set_ylabel("Loss")
+    axes[0].legend()
+    axes[0].grid(which="major", color="#666666", linestyle="--", alpha=0.2)
+    axes[0].minorticks_on()
+    axes[0].grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
+    axes[0].spines[["top", "right"]].set_visible(False)
+
+    axes[1].plot(epochs, train_loss, "b", label="Training loss")
+    axes[1].plot(epochs, val_loss, "r", label="Validation loss")
+    axes[1].set_title("Loss")
+    axes[1].set_xlabel("Epochs")
+    axes[1].set_ylabel("Loss")
+    axes[1].legend()
+    axes[1].grid(which="major", color="#666666", linestyle="--", alpha=0.2)
+    axes[1].minorticks_on()
+    axes[1].grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
+    axes[1].spines[["top", "right"]].set_visible(False)
+
+    plt.tight_layout()
+    plt.show()
