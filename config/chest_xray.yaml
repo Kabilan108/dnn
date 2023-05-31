@@ -28,3 +28,4 @@ features:
   train: "data/chest_xray/features/train"
   test: "data/chest_xray/features/test"
   val: "data/chest_xray/features/val"
+  classes: "data/chest_xray/features/classes.json"

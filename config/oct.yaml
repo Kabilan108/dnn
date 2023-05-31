@@ -28,3 +28,4 @@ features:
   train: "data/oct/features/train"
   test: "data/oct/features/test"
   val: "data/oct/features/val"
+  classes: "data/oct/features/classes.json"
