@@ -96,11 +96,6 @@ def main(config, kw):
         "val": DataLoader(data["val"], batch_size=config["batch-size"], shuffle=False),
     }
 
-    # Save class names and indices to disk
-    with open(config["features"]["classes"], "w") as file:
-        classes = data["train"].class_to_idx
-        json.dump(classes, file)
-
     # Load pretrained model
     model = train.load_ptm(config, replace_last=True, feature_extract=True)
     model = model.to(train.device())
@@ -129,6 +124,11 @@ def main(config, kw):
             for j, feature in enumerate(features):
                 label = labels[j].numpy()
                 np.save(f"{root}/FL{i * len(inputs) + j}.npy", (label, feature))
+
+    # Save class names and indices to disk
+    with open(config["features"]["classes"], "w") as file:
+        classes = data["train"].class_to_idx
+        json.dump(classes, file)
 
 
 if __name__ == "__main__":
