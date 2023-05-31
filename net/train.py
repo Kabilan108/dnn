@@ -281,6 +281,10 @@ def plot_roc(true_labels, pred_probs, config):
     labels = load_classes(config, ret="label")
     true_labels = label_binarize(true_labels, classes=classes)
 
+    # Adjust shape for two-class problem
+    if true_labels.shape[1] == 1:
+        true_labels = np.column_stack((1 - true_labels, true_labels))
+
     # Initialize variables
     fpr, tpr, roc_auc = {}, {}, {}
 
