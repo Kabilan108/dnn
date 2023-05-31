@@ -33,3 +33,30 @@ conda activate vit-med
 ### Evaluation
 
 ### Inference
+
+## Background
+
+### Datasets
+
+All datasets utilized for this project were obtained from Kaggle and were
+sourced from one or more academic publications. The following datasets were
+used:
+
+- [Retinal Optical Coherence Tomography (OCT)](https://www.kaggle.com/datasets/paultimothymooney/kermany2018)
+  - paultimothymooney/kermany2018
+  - Based on Kermany et. al. (2018)
+  - 84,495 images across 4 classes (CNV, DME, DRUSEN, NORMAL)
+    - Train/Test/Val split?
+- [Pediatric Chest X-Rays](https://www.kaggle.com/datasets/andrewmvd/pediatric-pneumonia-chest-xray)
+  - paultimothymooney/chest-xray-pneumonia
+  - Based on Kermany et. al. (2018)
+  - 5856 images across 2 classes (PNEUMONIA, NORMAL)
+    - Train/Test/Val split?
+- [Brain Tumor MRIs](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset)
+  - masoudnickparvar/brain-tumor-mri-dataset
+  - Includes data from
+    - Cheng, Jun (2017). brain tumor dataset. figshare. Dataset. https://doi.org/10.6084/m9.figshare.1512427.v5
+    - sartajbhuvaji/brain-tumor-classification-mri
+    - brain-tumor-detection?select=Br35H-Mask-RCNN
+  - 7022 images across 4 classes (MENINGIOMA, GLIOMA, PITUITARY, NORMAL)
+    - Train/Test/Val split?
