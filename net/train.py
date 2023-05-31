@@ -150,7 +150,7 @@ def train_model(
             history[phase]["loss"].append(epoch_loss)
 
             # Print epoch statistics
-            print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
+            print(f"{phase:6} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
 
             # Write to TensorBoard
             if writer is not None:
