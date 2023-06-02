@@ -1,0 +1,32 @@
+# Config for OCT Images
+
+name: "ViT-OCT"
+
+# Pre-trained model
+model-name: "ViT-base"
+checkpoint: "google/vit-base-patch16-224"
+input-height: 224
+input-width: 224
+
+# Model training parameters
+num-classes: 4
+batch-size: 8
+epochs: 20
+lr: 0.0002
+
+# Directories
+train-dir: "data/oct/train"
+test-dir: "data/oct/test"
+val-dir: "data/oct/val"
+
+# Image augmentation
+input-mean: [0.5, 0.5, 0.5]
+input-std: [0.5, 0.5, 0.5]
+
+# Bottlenecks (features)
+features:
+  root: "data/oct/vit-features"
+  train: "data/oct/vit-features/train"
+  test: "data/oct/vit-features/test"
+  val: "data/oct/vit-features/val"
+  classes: "data/oct/vit-features/classes.json"
