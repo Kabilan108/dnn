@@ -7,6 +7,7 @@ from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from torch.nn import functional as F
+from transformers import ViTModel
 import torch
 
 from sklearn.metrics import roc_curve, auc, roc_auc_score, confusion_matrix
@@ -29,6 +30,8 @@ def load_ptm(config, feature_extract=True, replace_last=False):
 
     if config["model-name"] == "inceptionv3":
         model = models.inception_v3(weights="IMAGENET1K_V1")
+    elif config["model-name"] == "ViT-base":
+        model = ViTModel.from_pretrained(config["checkpoint"], add_pooling_layer=False)
     else:
         raise NotImplementedError
 
@@ -40,6 +43,8 @@ def load_ptm(config, feature_extract=True, replace_last=False):
         if config["model-name"] == "inceptionv3":
             model.AuxLogits.fc = torch.nn.Identity()
             model.fc = torch.nn.Identity()
+        elif config["model-name"] == "ViT-base":
+            pass
         else:
             raise NotImplementedError
 

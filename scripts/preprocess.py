@@ -114,7 +114,13 @@ def main(config, kw):
             # Forward pass
             with torch.no_grad():
                 features = model(inputs)
-                features = features.cpu().detach().numpy()
+
+            # [ViT Only] extract embedding for CLS token
+            if config['model-name'] == 'ViT-base':
+                features = features.last_hidden_state[:, 0, :]
+            
+            # Convert to numpy
+            features = features.cpu().detach().numpy()
 
             # Create directory for split
             root = config["features"][split]
