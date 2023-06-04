@@ -14,6 +14,9 @@ batch-size:
 epochs: 50
 lr: 0.001
 
+# dataset (kaggle)
+dataset: "oct"
+
 # Directories
 train-dir: "data/oct/train"
 test-dir: "data/oct/test"
