@@ -24,18 +24,8 @@ train-dir: "data/chest_xray/train"
 test-dir: "data/chest_xray/test"
 val-dir: "data/chest_xray/val"
 
-# Training augmentation
-train-augmentation:
-  - - ToTensor
-    - {}
-  - - Resize
-    - size: [299, 299]
-  - - Normalize
-    - mean: [0.485, 0.456, 0.406]
-      std: [0.229, 0.224, 0.225]
-
-# Testing augmentation
-test-augmentation:
+# Image augmentation
+transforms:
   - - ToTensor
     - {}
   - - Resize
