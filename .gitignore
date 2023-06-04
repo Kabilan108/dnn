@@ -96,9 +96,7 @@ target/
 
 # Data and models
 data/
-models/
 !.gitkeep
-logs/
 
 # archives
 *.zip
