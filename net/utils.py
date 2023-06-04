@@ -92,3 +92,15 @@ def plot_history(history):
     plt.tight_layout()
 
     return fig, axes
+
+
+def create_transforms(transforms_list):
+    """Compose transformations for data augmentation"""
+
+    transform = []
+    for item in transforms_list:
+        name, args = item
+        tclass = getattr(transforms, name)
+        transform.append(tclass(**args))
+
+    return transforms.Compose(transform)
