@@ -7,12 +7,13 @@ model-name: "ViT-base"
 checkpoint: "google/vit-base-patch16-224"
 input-height: 224
 input-width: 224
+embed-dim: 768
 
 # Model training parameters
 num-classes: 4
-batch-size: 8
+batch-size: 1024
 epochs: 20
-lr: 0.0002
+lr: 0.001
 
 # Directories
 train-dir: "data/oct/train"
