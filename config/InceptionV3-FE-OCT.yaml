@@ -1,0 +1,43 @@
+# Config for IncpetionV3 (Feature Extractor) on OCT Images
+
+name: "InceptionV3-FE-OCT"
+
+# Pre-trained model
+model-name: "inceptionv3"
+fine-tune: false
+
+# Training parameters
+num-classes: 4
+batch-size:
+  feature-extraction: 64
+  clf-only: 1024
+epochs: 50
+lr: 0.001
+
+# Directories
+train-dir: "data/oct/train"
+test-dir: "data/oct/test"
+val-dir: "data/oct/val"
+
+# Training augmentation
+train-augmentation:
+  - - ToTensor
+    - {}
+  - - Resize
+    - size: [299, 299]
+  - - Normalize
+    - mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+# Testing augmentation
+test-augmentation:
+  - - ToTensor
+    - {}
+  - - Resize
+    - size: [299, 299]
+  - - Normalize
+    - mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+# Bottlenecks (features)
+features: "data/oct/InceptionV3-features"
