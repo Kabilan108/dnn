@@ -2,27 +2,27 @@
 Functions & Classes for Model Training
 """
 
-
-from torchvision import datasets, transforms, models
-from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torch.nn import functional as F
 from transformers import ViTModel
+from torchvision import models, datasets
+from torch import nn
 import torch
-
-from sklearn.metrics import roc_curve, auc, roc_auc_score, confusion_matrix
-from sklearn.preprocessing import label_binarize
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-import numpy as np
 
 from tqdm.auto import tqdm
 from glob import glob
+import numpy as np
+import pandas as pd
+import shutil
 import copy
 import json
 import time
+import sys
 import re
+import os
+
+sys.path.append(".")
+from net import train, data, utils
 
 
 def load_ptm(config, feature_extract=True, replace_last=False):
@@ -263,57 +263,121 @@ def load_classes(config, ret="index"):
         raise ValueError("Invalid return type")
 
 
-def plot_confusion(true_labels, pred_labels, config):
-    """Plot a confusion matrix"""
-    classes = load_classes(config, ret="label")
-    cm = pd.DataFrame(
-        confusion_matrix(true_labels, pred_labels), index=classes, columns=classes
-    )
+def create_transforms(transforms_list):
+    """Compose transformations for data augmentation"""
 
-    fig, ax = plt.subplots(figsize=(4, 4))
-    sns.heatmap(cm, annot=True, cmap="Reds", fmt="d", cbar=False, ax=ax)
-    ax.set_ylabel("True Labels", fontsize=11)
-    ax.set_xlabel("Predicted Labels", fontsize=11)
+    transform = []
+    for item in transforms_list:
+        name, args = item
+        tclass = getattr(transforms, name)
+        transform.append(tclass(**args))
 
-    return fig, ax
+    return transforms.Compose(transform)
 
 
-def plot_roc(true_labels, pred_probs, config):
-    """Plot ROC curve and compute AUC"""
+def compute_features(config):
+    """Compute features from a feature extractor"""
 
-    # Convert labels to binary format for one-vs-rest ROC curve
-    classes = load_classes(config, ret="index")
-    labels = load_classes(config, ret="label")
-    true_labels = label_binarize(true_labels, classes=classes)
+    # compose transforms
+    transforms = train.create_transforms(config["transforms"])
 
-    # Adjust shape for two-class problem
-    if true_labels.shape[1] == 1:
-        true_labels = np.column_stack((1 - true_labels, true_labels))
+    # create data loaders
+    dataloaders = {}
+    for split in ["train", "val", "test"]:
+        dataset = datasets.ImageFolder(config[f"{split}-dir"], transforms)
+        dataloaders[split] = DataLoader(
+            dataset,
+            batch_size=config["batch-size"]["feature-extraction"],
+            shuffle=split != "test",
+        )
 
-    # Initialize variables
-    fpr, tpr, roc_auc = {}, {}, {}
+    # Load pretrained model
+    model = train.load_model(config, replace_last=True, feature_extract=True)
+    model = model.to(train.device())
+    model.eval()
 
-    # Compute ROC curve and ROC area for each class
-    for i in range(len(classes)):
-        fpr[i], tpr[i], _ = roc_curve(true_labels[:, i], pred_probs[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
+    # Create directory for feature vectors
+    shutil.rmtree(config["features"], ignore_errors=True)
+    os.makedirs(config["features"], exist_ok=True)
 
-    # Plot all ROC curves
-    fig, ax = plt.subplots(figsize=(4, 4))
+    # Run images through model and save feature vectors
+    for split in ["train", "val", "test"]:
+        print(f"[bold blue]Extracting features for {split} set[/bold blue]")
 
-    for i, label in enumerate(labels):
-        ax.plot(fpr[i], tpr[i], lw=1.5, label=f"{label} (AUC = {roc_auc[i]:.3f})")
+        for i, (inputs, labels) in enumerate(tqdm(dataloaders[split], desc=split)):
+            # move to gpu
+            inputs = inputs.to(train.device())
 
-    ax.plot([0, 1], [0, 1], "k--", lw=1.5)
-    ax.legend(frameon=False, fontsize=9)
-    ax.set_xlim([-0.05, 1.0])
-    ax.set_ylim([0.0, 1.05])
-    ax.set_xlabel("False Positive Rate", fontsize=11)
-    ax.set_ylabel("True Positive Rate", fontsize=11)
-    ax.set_title("ROC Curve", fontsize=11)
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.grid(which="major", color="#666666", linestyle="--", alpha=0.2)
-    ax.minorticks_on()
-    ax.grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
+            # forward pass
+            with torch.no_grad():
+                features = model(inputs)
 
-    return fig, ax
+            # [ViT Only] extract embedding for CLS token
+            if config["model-name"] == "ViT-base":
+                features = features.last_hidden_state[:, 0, :]
+
+            # Convert to numpy
+            features = features.cpu().detach().numpy()
+
+            # Create directory for split
+            root = f"{config['features']}/{split}"
+            os.makedirs(root, exist_ok=True)
+
+            # Save features to disk
+            for j, feature in enumerate(features):
+                label = labels[j].numpy()
+                np.save(f"{root}/FL{i * len(inputs) + j}.npy", (label, feature))
+
+    # save class names and indices to disk
+    with open(f"{config['features']}/classes.json", "w") as file:
+        classes = data["train"].class_to_idx
+        json.dump(classes, file)
+
+    return True
+
+
+class FeatureDataset(Dataset):
+    """Custom dataset for using pre-trained feature extractors"""
+
+    def __init__(self, feature_dir):
+        self.files = sorted(glob(f"{feature_dir}/FL*.npy"), key=self._extract_idx)
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        label, feature = np.load(self.files[idx], allow_pickle=True)
+        return torch.from_numpy(feature), torch.from_numpy(label)
+
+    def _extract_idx(self, filename):
+        """Extract batch index from filename"""
+        match = re.search(r"(\d+)\.npy$", filename)
+        match = int(match.group(1)) if match else -1
+        if match == -1:
+            raise ValueError(f"Invalid filename {filename}")
+        return match
+
+
+class FeatureExtractor(nn.Module):
+    """Classifier for pre-trained feature extractors"""
+
+    def __init__(self, config):
+        super(FeatureExtractor, self).__init__()
+
+        self.clf = nn.Linear(config["embedding-dim"], config["num-classes"])
+
+    def forward(self, x):
+        x = self.clf(x)
+        return x
+
+
+class FineTuned(nn.Module):
+    """Fine-tuned model"""
+
+    def __init__(self, config):
+        super(FineTuned, self).__init__()
+
+        raise NotImplementedError
+
+    def forward(self, x):
+        raise NotImplementedError
