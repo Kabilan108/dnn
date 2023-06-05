@@ -105,9 +105,9 @@ def plot_hist(history):
 
     axes[0].plot(epochs, train_loss, "b", label="Training loss")
     axes[0].plot(epochs, val_loss, "r", label="Validation loss")
-    axes[0].set_title("Loss")
+    axes[0].set_title("Categorical Crossentropy Loss")
     axes[0].set_xlabel("Epoch")
-    axes[0].set_ylabel("Categorical Crossentropy Loss")
+    axes[0].set_ylabel("Loss")
     axes[0].legend()
     axes[0].grid(which="major", color="#666666", linestyle="--", alpha=0.2)
     axes[0].minorticks_on()
