@@ -1,9 +1,5 @@
 model	description	test_acc
-oct-preprocess-0531_233112	InceptionV3; Feature Extract; OCT	0.89271
-chest_xray-preprocess-0531_231347	InceptionV3; Feature Extract; Chest X-Ray	0.82118
-chest_xray-preprocess-0602_133449	ViT; Feature Extract; Chest X-Ray	0.78205
-ViTb-FE-XRay-0605-022846		74.30555555555556
-InceptionV3-FE-XRay-0605-033906		79.6875
-ViTb-FE-XRay-0605-034614		75.0
-InceptionV3-FE-OCT-0605-041511		89.47916666666667
-ViTb-FE-OCT-0605-050850		89.6875
+InceptionV3-FE-XRay-0605-033906	InceptionV3; Feature Extractor & Classifier; Chest X-Rays; 2-class	79.6875
+ViTb-FE-XRay-0605-034614	ViT-base; Feature Extractor & Classifier; Chest X-Rays; 2-class	75.0
+InceptionV3-FE-OCT-0605-041511	InceptionV3; Feature Extractor & Classifier; OCT; 4-class	89.47916666666667
+ViTb-FE-OCT-0605-050850	ViT-base; Feature Extractor & Classifier; OCT; 4-class	89.6875
