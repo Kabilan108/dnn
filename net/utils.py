@@ -101,7 +101,7 @@ def plot_hist(history):
 
     epochs = range(1, len(train_loss) + 1)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 
     axes[0].plot(epochs, train_loss, "b", label="Training loss")
     axes[0].plot(epochs, val_loss, "r", label="Validation loss")
