@@ -2,10 +2,32 @@
 Utility functions
 """
 
-from sklearn.metrics import roc_curve, auc
-import torchvision.transforms as transforms
+from sklearn.metrics import confusion_matrix, roc_curve, auc
+from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
 import yaml
+import json
+
+
+def load_classes(config, ret="index"):
+    """
+    Load an ordered list of classes based on the dataset created when computing
+    features
+    """
+    with open(f"{config['features']}/classes.json", "r") as f:
+        ctoi = json.load(f)
+
+    if ret == "label":
+        return sorted(ctoi, key=ctoi.get)
+    elif ret == "index":
+        return sorted(ctoi.values())
+    elif ret == "dict":
+        return ctoi
+    else:
+        raise ValueError("Invalid return type")
 
 
 def plot_confusion(true_labels, pred_labels, config):
