@@ -83,6 +83,8 @@ def plot_roc(true_labels, pred_probs, config):
     ax.minorticks_on()
     ax.grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
 
+    plt.tight_layout()
+
     return fig, ax
 
 
