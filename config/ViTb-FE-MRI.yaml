@@ -1,0 +1,38 @@
+# Config for ViT-base (Feature Extractor) on OCT Images
+
+name: "ViTb-FE-OCT"
+
+# Pre-trained model
+model-name: "ViT-base"
+checkpoint: "google/vit-base-patch16-224"
+fine-tune: false
+embedding-dim: 768
+
+# Training parameters
+num-classes: 4
+batch-size:
+  feature-extraction: 64
+  clf: 1024
+epochs: 50
+lr: 0.001
+
+# dataset (kaggle)
+dataset: "oct"
+
+# Directories
+train-dir: "data/oct/train"
+test-dir: "data/oct/test"
+val-dir: "data/oct/val"
+
+# Image augmentation
+transforms:
+  - - ToTensor
+    - {}
+  - - Resize
+    - size: [224, 224]
+  - - Normalize
+    - mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+# Bottlenecks (features)
+features: "data/oct/ViTb-features"
