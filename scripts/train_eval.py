@@ -70,7 +70,7 @@ def cli():
 @click.option("-v", "--verbose", is_flag=True, help="Print training progress")
 @click.option(
     "--kw",
-    default="",
+    default=None,
     callback=utils.parse_kwargs,
     help="Comma separated list of kwargs to override config file",
 )
@@ -125,10 +125,10 @@ def run(config, log, verbose, kw):
     optimizer = optim.Adam(trainable, lr=config["lr"])
 
     # define model name
+    timestamp = datetime.now().strftime("%m%d-%H%M%S")
     name = f"{config['name']}-{timestamp}"
 
     # initialize training and logging
-    timestamp = datetime.now().strftime("%m%d-%H%M%S")
     if log:
         writer = SummaryWriter(f"logs/{name}")
     else:
