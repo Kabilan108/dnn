@@ -162,7 +162,7 @@ def train_model(
             # Calculate epoch statistics
             N = len(dataloaders[phase].dataset)
             epoch_loss = running_loss / N
-            epoch_acc = running_corrects.double() / N
+            epoch_acc = running_corrects.double().item() / N
 
             # Update history
             history[phase]["acc"].append(epoch_acc)
