@@ -3,3 +3,5 @@ InceptionV3-FE-XRay-0605-033906	InceptionV3; Feature Extractor & Classifier; Che
 ViTb-FE-XRay-0605-034614	ViT-base; Feature Extractor & Classifier; Chest X-Rays; 2-class	75.0
 InceptionV3-FE-OCT-0605-041511	InceptionV3; Feature Extractor & Classifier; OCT; 4-class	89.47916666666667
 ViTb-FE-OCT-0605-050850	ViT-base; Feature Extractor & Classifier; OCT; 4-class	89.6875
+InceptionV3-FE-MRI-0605-203648		87.32638888888889
+ViTb-FE-MRI-0605-204217		91.57986111111111
