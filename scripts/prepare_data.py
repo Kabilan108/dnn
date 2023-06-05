@@ -4,20 +4,10 @@ Download and prepare dataset.
 Run this script with the --help flag to see the options.
 """
 
-from torch.utils.data import DataLoader
-from torchvision import datasets
-import torch
-
-from tqdm.auto import tqdm
 from rich import print
 
-import numpy as np
-import shutil
 import click
-import json
-import yaml
 import sys
-import os
 
 sys.path.append(".")
 from net import train, data, utils
