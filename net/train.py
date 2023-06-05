@@ -10,6 +10,7 @@ from torch import nn
 import torch
 
 from tqdm.auto import tqdm
+from rich import print
 from glob import glob
 import numpy as np
 import shutil
