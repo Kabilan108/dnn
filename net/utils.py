@@ -2,57 +2,69 @@
 Utility functions
 """
 
-from sklearn.metrics import roc_auc_score, roc_curve, auc
-
-import matplotlib.pyplot as plt
-import glob
-import os
-
+from sklearn.metrics import roc_curve, auc
 import torchvision.transforms as transforms
-import torch
+import matplotlib.pyplot as plt
+import yaml
 
 
-def plot_roc(y_test, y_score, pos_label=0):
-    """
-    Plot a Receiver Operating Characteristic (ROC) curve and return the Area
-    Under the Curve (AUC) score.
+def plot_confusion(true_labels, pred_labels, config):
+    """Plot a confusion matrix"""
+    classes = load_classes(config, ret="label")
+    cm = pd.DataFrame(
+        confusion_matrix(true_labels, pred_labels), index=classes, columns=classes
+    )
 
-    Parameters
-    ----------
-    y_true: ndarray of shape (n_samples,)
-        True binary labels.
+    fig, ax = plt.subplots(figsize=(4, 4))
+    sns.heatmap(cm, annot=True, cmap="Reds", fmt="d", cbar=False, ax=ax)
+    ax.set_ylabel("True Labels", fontsize=11)
+    ax.set_xlabel("Predicted Labels", fontsize=11)
 
-    y_score: ndarray of shape (n_samples,)
-        Target scores, (probability estimates of the positive class).
+    return fig, ax
 
-    pos_label: int or str, default=None
-        The label of the positive class.
-    """
 
-    fpr, tpr, _ = roc_curve(y_test, y_score, pos_label=pos_label)
-    auc_roc = auc(fpr, tpr)
+def plot_roc(true_labels, pred_probs, config):
+    """Plot ROC curve and compute AUC"""
 
-    fig, ax = plt.subplots(figsize=(4, 3))
-    ax.plot(fpr, tpr, color="darkorange", label=f"ROC Curve (AUC = {auc_roc:.2f})")
-    ax.plot([0, 1], [0, 1], "k--")
-    ax.legend(loc="lower right", fancybox=False, frameon=False)
+    # Convert labels to binary format for one-vs-rest ROC curve
+    classes = load_classes(config, ret="index")
+    labels = load_classes(config, ret="label")
+    true_labels = label_binarize(true_labels, classes=classes)
 
-    ax.set_xlabel("False Positive Rate")
-    ax.set_ylabel("True Positive Rate")
+    # Adjust shape for two-class problem
+    if true_labels.shape[1] == 1:
+        true_labels = np.column_stack((1 - true_labels, true_labels))
 
-    # Major and minor grid lines
+    # Initialize variables
+    fpr, tpr, roc_auc = {}, {}, {}
+
+    # Compute ROC curve and ROC area for each class
+    for i in range(len(classes)):
+        fpr[i], tpr[i], _ = roc_curve(true_labels[:, i], pred_probs[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Plot all ROC curves
+    fig, ax = plt.subplots(figsize=(4, 4))
+
+    for i, label in enumerate(labels):
+        ax.plot(fpr[i], tpr[i], lw=1.5, label=f"{label} (AUC = {roc_auc[i]:.3f})")
+
+    ax.plot([0, 1], [0, 1], "k--", lw=1.5)
+    ax.legend(frameon=False, fontsize=9)
+    ax.set_xlim([-0.05, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel("False Positive Rate", fontsize=11)
+    ax.set_ylabel("True Positive Rate", fontsize=11)
+    ax.set_title("ROC Curve", fontsize=11)
+    ax.spines[["top", "right"]].set_visible(False)
     ax.grid(which="major", color="#666666", linestyle="--", alpha=0.2)
     ax.minorticks_on()
     ax.grid(which="minor", color="#999999", linestyle="-.", alpha=0.1)
-    ax.spines[["top", "right"]].set_visible(False)
 
-    plt.xlim([0.0, 1.05])
-    plt.ylim((0.0, 1.05))
-
-    return auc_roc, (fig, ax)
+    return fig, ax
 
 
-def plot_history(history):
+def plot_hist(history):
     """
     Plot training history
     """
@@ -94,13 +106,39 @@ def plot_history(history):
     return fig, axes
 
 
-def create_transforms(transforms_list):
-    """Compose transformations for data augmentation"""
+def parse_kwargs(ctx, param, value):
+    """Parse kwargs from command line"""
+    if not value:
+        return {}
 
-    transform = []
-    for item in transforms_list:
-        name, args = item
-        tclass = getattr(transforms, name)
-        transform.append(tclass(**args))
+    kwargs = {}
+    for kv in value.split(","):
+        k, v = kv.split("=")
 
-    return transforms.Compose(transform)
+        try:
+            kwargs[k] = int(v)
+        except ValueError:
+            try:
+                kwargs[k] = float(v)
+            except ValueError:
+                kwargs[k] = v
+
+    return kwargs
+
+
+def parse_config(config, kw=None):
+    """Parse config file"""
+
+    # load config file
+    try:
+        with open(config, "r") as file:
+            config = yaml.safe_load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Config file {config} not found")
+
+    # override config file with command line arguments
+    if kw is not None:
+        for k, v in kw.items():
+            config[k] = v
+
+    return config
