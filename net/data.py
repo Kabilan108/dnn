@@ -111,7 +111,6 @@ def download_mri():
 
         # Move the selected files to the validation directory
         for file in val_files:
-            # shutil.move(os.path.join(class_test_dir, file), class_val_dir)
-            shutil.copy(os.path.join(class_test_dir, file), class_val_dir)
+            shutil.move(os.path.join(class_test_dir, file), class_val_dir)
 
     return
