@@ -135,6 +135,15 @@ def run(config, log, verbose, kw):
         writer = None
     EPOCH = 0
 
+    # do we need inception weirdness?
+    if config["model-name"] == "inceptionv3":
+        if not config["fine-tune"]:
+            is_inception = False
+        else:
+            is_inception = True
+    else:
+        is_inception = False
+
     # train the model
     best_model, history = train.train_model(
         model=model,
@@ -145,7 +154,7 @@ def run(config, log, verbose, kw):
         epoch_start=EPOCH,
         writer=writer,
         scheduler=None,
-        is_inception=config["model-name"] == "inceptionv3",
+        is_inception=is_inception,
     )
     EPOCH += config["epochs"]
 
