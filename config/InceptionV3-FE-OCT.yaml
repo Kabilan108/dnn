@@ -5,12 +5,13 @@ name: "InceptionV3-FE-OCT"
 # Pre-trained model
 model-name: "inceptionv3"
 fine-tune: false
+embedding-dim: 2048
 
 # Training parameters
 num-classes: 4
 batch-size:
   feature-extraction: 64
-  clf-only: 1024
+  clf: 1024
 epochs: 50
 lr: 0.001
 

@@ -13,7 +13,7 @@ num-classes: 2
 batch-size:
   feature-extraction: 64
   fine-tuning: 8
-  clf-only: 1024
+  clf: 1024
 epochs: 20
 lr: 0.001
 
