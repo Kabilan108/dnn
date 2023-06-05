@@ -2,27 +2,22 @@
 Functions & Classes for Model Training
 """
 
+from torchvision import models, datasets, transforms
 from torch.utils.data import Dataset, DataLoader
 from torch.nn import functional as F
 from transformers import ViTModel
-from torchvision import models, datasets
 from torch import nn
 import torch
 
 from tqdm.auto import tqdm
 from glob import glob
 import numpy as np
-import pandas as pd
 import shutil
 import copy
 import json
 import time
-import sys
 import re
 import os
-
-sys.path.append(".")
-from net import train, data, utils
 
 
 def load_ptm(config, feature_extract=True, replace_last=False):
@@ -245,24 +240,6 @@ def evaluate_model(model, test_loader):
     return acc, true_labs, pred_labs, pred_probs
 
 
-def load_classes(config, ret="index"):
-    """
-    Load an ordered list of classes based on the dataset created when computing
-    features
-    """
-    with open(config["features"]["classes"], "r") as f:
-        ctoi = json.load(f)
-
-    if ret == "label":
-        return sorted(ctoi, key=ctoi.get)
-    elif ret == "index":
-        return sorted(ctoi.values())
-    elif ret == "dict":
-        return ctoi
-    else:
-        raise ValueError("Invalid return type")
-
-
 def create_transforms(transforms_list):
     """Compose transformations for data augmentation"""
 
@@ -279,21 +256,21 @@ def compute_features(config):
     """Compute features from a feature extractor"""
 
     # compose transforms
-    transforms = train.create_transforms(config["transforms"])
+    transforms = create_transforms(config["transforms"])
 
     # create data loaders
-    dataloaders = {}
+    data, dataloaders = {}, {}
     for split in ["train", "val", "test"]:
-        dataset = datasets.ImageFolder(config[f"{split}-dir"], transforms)
+        data[split] = datasets.ImageFolder(config[f"{split}-dir"], transforms)
         dataloaders[split] = DataLoader(
-            dataset,
+            data[split],
             batch_size=config["batch-size"]["feature-extraction"],
             shuffle=split != "test",
         )
 
     # Load pretrained model
-    model = train.load_model(config, replace_last=True, feature_extract=True)
-    model = model.to(train.device())
+    model = load_ptm(config, replace_last=True, feature_extract=True)
+    model = model.to(device())
     model.eval()
 
     # Create directory for feature vectors
@@ -306,7 +283,7 @@ def compute_features(config):
 
         for i, (inputs, labels) in enumerate(tqdm(dataloaders[split], desc=split)):
             # move to gpu
-            inputs = inputs.to(train.device())
+            inputs = inputs.to(device())
 
             # forward pass
             with torch.no_grad():
