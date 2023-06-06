@@ -1,5 +1,7 @@
 # Evaluation of State-of-the-Art Models for Medical Image Classification
 
+Authors: [Tony Kabilan Okeke](mailto:tonykabilanokeke@gmail.com)
+
 ## Problem Statement
 
 Medical imaging serves as a critical diagnostic tool, yet its use is often hampered by challenges related to image quality, reliability and interoperability. These challenges stem from the variability of diagnostic images, leading to uncertainty and potential inaccurate diagnoses, subsequently guiding clinicians towards improper treatment strategies. Deep Neural Networks (DNNs) have emerged as a promising solution to these issues. Specifically, Convolutional Neural Networks (CNNs) have shown significant potential in the identification of diseases in medical images. For instance, research by Kermany et. al. demonstrated the efficacy of a fine-tuned CNN in diagnosing a variety of retinal diseases in Optical Coherence Tomography (OCT) scans, as well as pneumonia in pediatric chest radiographs [1]. In 2017, Esteva et. al. fine-tuned a similar CNN to diagnose over 20 unique skin conditions, and achieved performance on par with a team of board-certified dermatologists [2].
