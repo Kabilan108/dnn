@@ -1,6 +1,15 @@
-# Evaluating Vision Transformers for Medical Image Classification
+# Evaluation of State-of-the-Art Models for Medical Image Classification
 
-## Abstract
+## Problem Statement
+
+Medical imaging serves as a critical diagnostic tool, yet its use is often hampered by challenges related to image quality, reliability and interoperability. These challenges stem from the variability of diagnostic images, leading to uncertainty and potential inaccurate diagnoses, subsequently guiding clinicians towards improper treatment strategies. Deep Neural Networks (DNNs) have emerged as a promising solution to these issues. Specifically, Convolutional Neural Networks (CNNs) have shown significant potential in the identification of diseases in medical images. For instance, research by Kermany et. al. demonstrated the efficacy of a fine-tuned CNN in diagnosing a variety of retinal diseases in Optical Coherence Tomography (OCT) scans, as well as pneumonia in pediatric chest radiographs [1]. In 2017, Esteva et. al. fine-tuned a similar CNN to diagnose over 20 unique skin conditions, and achieved performance on par with a team of board-certified dermatologists [2].
+
+Nonetheless, it's crucial to understand that computational classification is not limited to CNNs. In the wake of large language models' emergence, the transformer architecture has gained significant traction across numerous tasks in natural language processing​ [3]​. The transformer's application has extended to computer vision, marked by the development of various Vision Transformers (ViTs) that have proven to be highly effective in object segmentation tasks [4]​. However, a comprehensive investigation into the comparative performance of these models in medical image classification tasks remains to be conducted.
+
+This research aims to bridge the gap in medical imaging diagnostics by evaluating the performance of state-of-the-art CNN models, the Inception V3 architecture used by Kermany et. al., with that of the more recent ViTs across a variety of medical imaging modalities including OCT scans, radiographs (X-rays), and Magnetic Resonance Imaging (MRIs).
+
+By undertaking this research, we aim to contribute to the refinement of current diagnostic capabilities and potentially inspire further exploration of alternative neural network methodologies in medical imaging. Our hope is that the results could lead to a more robust and standardised approach to diagnostic care, thus reducing the uncertainty faced by many clinicians when using medical imaging for diagnostics.
+
 
 ## Quick Start
 
@@ -22,41 +31,15 @@ conda env create -f environment.yml
 conda activate vit-med
 ```
 
-4. Download the OCT and Chest X-Ray datasets:
+4. Train a model:
 
 ```bash
-./scripts/download_data.sh
+python scripts/train_eval -lv -c config/<YOUR_CONFIG>.yaml
 ```
 
-### Training & Validation
+### Running in Colab
 
-### Evaluation
-
-### Inference
-
-## Background
-
-### Datasets
-
-All datasets utilized for this project were obtained from Kaggle and were
-sourced from one or more academic publications. The following datasets were
-used:
-
-- [Retinal Optical Coherence Tomography (OCT)](https://www.kaggle.com/datasets/paultimothymooney/kermany2018)
-  - paultimothymooney/kermany2018
-  - Based on Kermany et. al. (2018)
-  - 84,495 images across 4 classes (CNV, DME, DRUSEN, NORMAL)
-    - Train/Test/Val split?
-- [Pediatric Chest X-Rays](https://www.kaggle.com/datasets/andrewmvd/pediatric-pneumonia-chest-xray)
-  - paultimothymooney/chest-xray-pneumonia
-  - Based on Kermany et. al. (2018)
-  - 5856 images across 2 classes (PNEUMONIA, NORMAL)
-    - Train/Test/Val split?
-- [Brain Tumor MRIs](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset)
-  - masoudnickparvar/brain-tumor-mri-dataset
-  - Includes data from
-    - Cheng, Jun (2017). brain tumor dataset. figshare. Dataset. https://doi.org/10.6084/m9.figshare.1512427.v5
-    - sartajbhuvaji/brain-tumor-classification-mri
-    - brain-tumor-detection?select=Br35H-Mask-RCNN
-  - 7022 images across 4 classes (MENINGIOMA, GLIOMA, PITUITARY, NORMAL)
-    - Train/Test/Val split?
+* Click the "Open in Colab" button in the [VSCode-Server](notebooks/VSCode-Server.ipynb) notebook
+* Run the top cell to install dependencies, mount your Google Drive, and clone the repo
+* This will also start an SSH server on the VM
+  * Copy the connect to the session via local VSCode
